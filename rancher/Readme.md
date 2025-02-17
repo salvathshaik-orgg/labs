@@ -25,9 +25,9 @@ kubectl apply -f cert-manager.crds.yaml
    ```sh
    helm upgrade --install rancher rancher/rancher \
      --namespace cattle-system --create-namespace \
-     --set hostname=pocrancher.corp.equinix.com \
+     --set hostname=<anyname.example.com> \
      --set ingress.tls.source=cert-manager \
-     --set letsEncrypt.email=sbashashaik@equinix.com \
+     --set letsEncrypt.email=<email> \
      --wait
    ```
    > Note: You can modify the hostname as needed. Later, you can update the Ingress file to allow traffic from any domain.
@@ -60,9 +60,7 @@ kubectl apply -f cert-manager.crds.yaml
      ingressClassName: nginx
      tls:
      - hosts:
-         - amp.corp.equinix.com
-         - sv2lxelaappr023.corp.equinix.com
-         - sv2lxelaappr023
+         - anyname.example.com
        secretName: tls-rancher-ingress
      rules:
      - http:
