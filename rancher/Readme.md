@@ -18,6 +18,9 @@ Cert-Manager is required to manage SSL/TLS certificates for Rancher.
 ## Step 2: Install the Nginx Ingress Controller
 
 Ensure that the Nginx Ingress Controller is installed before proceeding with Rancher installation.
+```sh
+https://github.com/salvathshaik-orgg/kubernetes/blob/master/scripts/ingress-controller-nginx-new-version-second.yaml
+```
 
 ## Step 3: Configure SSL Certificates
 
