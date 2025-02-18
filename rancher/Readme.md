@@ -19,7 +19,7 @@ Cert-Manager is required to manage SSL/TLS certificates for Rancher.
 
 Ensure that the Nginx Ingress Controller is installed before proceeding with Rancher installation.
 ```sh
-wget https://github.com/salwad-basha-shaik/observability-tools-k8-configs/raw/refs/heads/main/grafana/ingress-controller-nginx-new-version-second.yaml
+wget https://raw.githubusercontent.com/salwad-basha-shaik/observability-tools-k8-configs/refs/heads/main/grafana/ingress-controller-nginx-new-version-second.yaml?token=GHSAT0AAAAAAC5YRYVWLBBY3KRRYM7NL44KZ5U3KLQ
 ```
 
 ## Step 3: Configure SSL Certificates
