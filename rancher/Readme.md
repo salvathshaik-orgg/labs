@@ -25,7 +25,7 @@ Ensure that the Nginx Ingress Controller is installed before proceeding with Ran
 
 ```sh
 https://raw.githubusercontent.com/salvathshaik-orgg/kubernetes/refs/heads/master/scripts/self-signed-certificate-openssl.md
-```sh
+```
 
 ### 1. Get SSL Certificates and Validate
 Obtain the certificates with new server names and validate them:
