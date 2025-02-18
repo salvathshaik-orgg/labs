@@ -1,39 +1,94 @@
 # Rancher Installation Guide
 
 ## Step 1: Install Cert-Manager
-Cert-Manager is required for Rancher to manage TLS certificates.
 
+Cert-Manager is required to manage SSL/TLS certificates for Rancher.
+
+1. Download the Cert-Manager manifests:
+   ```sh
+   wget https://github.com/cert-manager/cert-manager/releases/download/v1.17.1/cert-manager.yaml
+   wget https://github.com/cert-manager/cert-manager/releases/download/v1.17.1/cert-manager.crds.yaml
+   ```
+2. Apply the manifests to the cluster:
+   ```sh
+   kubectl apply -f cert-manager.yaml
+   kubectl apply -f cert-manager.crds.yaml
+   ```
+
+## Step 2: Install the Nginx Ingress Controller
+
+Ensure that the Nginx Ingress Controller is installed before proceeding with Rancher installation.
+
+## Step 3: Configure SSL Certificates
+
+### 1. Get SSL Certificates and Validate
+Obtain the certificates with new server names and validate them:
 ```sh
-wget https://github.com/cert-manager/cert-manager/releases/download/v1.17.1/cert-manager.yaml
-wget https://github.com/cert-manager/cert-manager/releases/download/v1.17.1/cert-manager.crds.yaml
-kubectl apply -f cert-manager.yaml
-kubectl apply -f cert-manager.crds.yaml
+openssl x509 -in qaamp.crt -text | grep <server-name>
+openssl x509 -text -inform DER -in certificate.crt | grep  <server-name>
 ```
 
-## Step 2: Install NGINX Ingress Controller
-Ensure that you have the NGINX Ingress Controller installed before proceeding with Rancher installation.
+#### Example Certificate Format
+**For Certificate (.crt file):**
+```
+-----BEGIN CERTIFICATE-----
+(base64-encoded certificate data)
+-----END CERTIFICATE-----
+```
+**For Key (.key file):**
+```
+-----BEGIN RSA PRIVATE KEY-----
+(base64-encoded certificate data)
+-----END RSA PRIVATE KEY-----
+```
 
-## Step 3: Install Rancher Using Helm
+### 2. Create a Kubernetes Secret for SSL Certificates
+```sh
+kubectl create secret tls qa-secret-tls --cert=/apps/cert/qa.crt --key=/apps/cert/key-decrypted.key -n ingress-nginx-second
+```
+
+### 3. Modify the Ingress Controller Deployment
+Update the following file to set the default SSL certificate:
+
+**File Path:** `/apps/observability_tools/main/grafana/ingress-nginx-controller-new-deployment.yml`
+
+**Modify the following field:**
+```yaml
+spec:
+  containers:
+    - args:
+        - /nginx-ingress-controller
+        - --election-id=ingress-nginx-leader
+        - --controller-class=k8s.io/ingress-nginx
+        - --ingress-class=nginx
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --default-ssl-certificate=$(POD_NAMESPACE)/qa-secret-tls
+        - --validating-webhook=:8443
+        - --validating-webhook-certificate=/usr/local/certificates/cert
+        - --validating-webhook-key=/usr/local/certificates/key
+        - --enable-metrics=false
+```
+
+## Step 4: Install Rancher using Helm
+
 Add the Rancher Helm repository:
-
 ```sh
 helm repo add rancher https://releases.rancher.com/server-charts/stable
-helm repo update
 ```
 
-Install Rancher with Helm:
-
+Install Rancher with the following command:
 ```sh
 helm upgrade --install rancher rancher/rancher \
   --namespace cattle-system --create-namespace \
-  --set hostname=pocrancher.corp.equinix.com \
+  --set hostname=pocrancher.example.com \
   --set ingress.tls.source=cert-manager \
-  --set letsEncrypt.email=sbashashaik@equinix.com \
+  --set cert-manager.email=salwad@example.com \
   --wait
 ```
 
-## Step 4: Configure Rancher Ingress
-Delete any existing Rancher ingress configuration and apply the following:
+## Step 5: Configure Rancher Ingress
+
+Replace the existing ingress file with the following configuration to allow Rancher access from any host:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -50,9 +105,7 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-      - amp.corp.equinix.com
-      - sv2lxelaappr023.corp.equinix.com
-      - sv2lxelaappr023
+      - pocrancher.example.com
     secretName: tls-rancher-ingress
   rules:
   - http:
@@ -66,28 +119,28 @@ spec:
                 number: 80
 ```
 
-## Step 5: Access Rancher
-Now access the Rancher cluster URL:
+## Step 6: Access Rancher
 
-```
-Rancher URL: https://hostname.example.com:31577
-Rancher Password: xcfpehp5aHRR
-```
+Now you can access the Rancher UI using the following details:
 
-## Step 6: Create a Rancher Cluster from UI
-1. Go to **Clusters** → Click on **CREATE** (Not the Import option).
-2. Click on **RKE1** → Select **Custom**.
-3. Select **Kubernetes Version (e.g., 1.30 from RKE)**.
-4. Select **Calico** as the Container Network.
-5. Copy the generated Docker command and run it on the server to create and connect the RKE cluster.
+- **Rancher URL:** [https://hostname.example.com:31577](https://hostname.example.com:31577)
+- **Rancher Password:** `xcfpehp5aHRR`
+
+## Step 7: Create a Rancher Cluster from UI
+
+1. Go to **Clusters** > Click on **CREATE** (not importing option).
+2. Select **RKE1**.
+3. Choose **Custom**.
+4. Select **Kubernetes Version** (e.g., 1.30 from RKE).
+5. Choose **Calico** as the container network.
+6. Copy the generated Docker command and run it on the server to add it to the Rancher cluster.
 
 ### Sample Docker Command:
 ```sh
-sudo docker run -d --privileged --restart=unless-stopped --net=host \
-  -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run \
+sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run \
   rancher/rancher-agent:v2.10.2 --server https://hostname.example.com:31577 \
   --token xrxmbj877tkvqt7kqzp4gw7nz5pjzzfx9n5hph9gsv8 --etcd --controlplane --worker
 ```
 
-Now, your Rancher cluster is successfully set up and can be managed through the Rancher UI.
+Now, Rancher will create an RKE cluster, and you can manage and monitor the cluster from the UI. 🎉
 
