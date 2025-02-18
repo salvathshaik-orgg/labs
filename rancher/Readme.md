@@ -86,11 +86,12 @@ helm repo add rancher https://releases.rancher.com/server-charts/stable
 ```
 
 Install Rancher with the following command: 1st one is for self-signed certificates
+check this URL for more description: https://ranchermanager.docs.rancher.com/v2.8/getting-started/installation-and-upgrade/install-upgrade-on-a-kubernetes-cluster
 ```sh
 helm upgrade --install rancher rancher/rancher \
   --namespace cattle-system --create-namespace \
   --set hostname=pocrancher.example.com \
-  --set tls=external \
+  --set ingress.tls.source=secret \
   --set privateCA=true \
   --wait
 ```
