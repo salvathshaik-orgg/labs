@@ -85,7 +85,7 @@ Add the Rancher Helm repository:
 helm repo add rancher https://releases.rancher.com/server-charts/stable
 ```
 
-Install Rancher with the following command:
+Install Rancher with the following command: 1st one is for self-signed certificates
 ```sh
 helm upgrade --install rancher rancher/rancher \
   --namespace cattle-system --create-namespace \
