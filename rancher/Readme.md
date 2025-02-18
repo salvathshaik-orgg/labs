@@ -90,10 +90,21 @@ Install Rancher with the following command:
 helm upgrade --install rancher rancher/rancher \
   --namespace cattle-system --create-namespace \
   --set hostname=pocrancher.example.com \
+  --set tls=external \
+  --set privateCA=true \
+  --wait
+```
+
+```sh
+helm upgrade --install rancher rancher/rancher \
+  --namespace cattle-system --create-namespace \
+  --set hostname=pocrancher.example.com \
   --set ingress.tls.source=cert-manager \
   --set cert-manager.email=salwad@example.com \
   --wait
 ```
+
+
 
 ## Step 5: Configure Rancher Ingress
 
