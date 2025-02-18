@@ -1,5 +1,7 @@
 # Rancher Installation Guide
 
+## NOTE: As per my POC i am getting error as unknown CA authority when am using self signed certificates so its better to use known CA certificates to work Rancher.
+
 ## Step 1: Install Cert-Manager
 
 Cert-Manager is required to manage SSL/TLS certificates for Rancher.
